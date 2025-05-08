@@ -423,3 +423,803 @@ for key, value in price_breakdown.items():
 
 # 5. Output:
 # Get a clear breakdown of material cost, labor, overhead, and the final selling price.
+
+# Let's enhance the Python script by building a web-based calculator using Flask, a lightweight web framework. This will allow you to run the calculator on a browser, provide user inputs via a form, and display results dynamically.
+
+# Web-Based Calculator with Flask
+# Project Structure
+
+# solar_pricing/
+# ├── app.py               # Main Flask application
+# ├── templates/
+# │   ├── index.html       # Input form
+# │   ├── result.html      # Output page
+# ├── static/              # Optional: CSS/JS files
+
+# 1. Flask Application Code (app.py)
+
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+def calculate_battery_price(materials, labor_hours, hourly_rate, overhead, profit_margin):
+    # Calculate material costs
+    total_material_cost = sum(material['cost'] * material['quantity'] for material in materials)
+    
+    # Calculate labor cost
+    labor_cost = labor_hours * hourly_rate
+    
+    # Total cost before profit
+    total_cost = total_material_cost + labor_cost + overhead
+    
+    # Apply profit margin
+    selling_price = total_cost * (1 + profit_margin / 100)
+    
+    return {
+        "Material Cost": total_material_cost,
+        "Labor Cost": labor_cost,
+        "Overhead": overhead,
+        "Total Cost (Before Profit)": total_cost,
+        "Selling Price": selling_price
+    }
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    # Get form data
+    materials = []
+    for i in range(1, 4):  # Assuming max 3 materials for simplicity
+        name = request.form.get(f"material_name_{i}")
+        cost = float(request.form.get(f"material_cost_{i}", 0))
+        quantity = int(request.form.get(f"material_quantity_{i}", 0))
+        if name and cost > 0 and quantity > 0:
+            materials.append({"name": name, "cost": cost, "quantity": quantity})
+    
+    labor_hours = float(request.form.get("labor_hours", 0))
+    hourly_rate = float(request.form.get("hourly_rate", 0))
+    overhead = float(request.form.get("overhead", 0))
+    profit_margin = float(request.form.get("profit_margin", 0))
+    
+    # Calculate price
+    price_breakdown = calculate_battery_price(materials, labor_hours, hourly_rate, overhead, profit_margin)
+    
+    return render_template('result.html', price_breakdown=price_breakdown)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+# 2. Input Form Template (templates/index.html)
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Battery Pricing Calculator</title>
+</head>
+<body>
+    <h1>Solar Battery Pricing Calculator</h1>
+    <form action="/calculate" method="post">
+        <h3>Materials</h3>
+        {% for i in range(1, 4) %}
+        <label for="material_name_{{ i }}">Material Name {{ i }}</label>
+        <input type="text" name="material_name_{{ i }}" required><br>
+        
+        <label for="material_cost_{{ i }}">Cost per Unit (USD)</label>
+        <input type="number" name="material_cost_{{ i }}" step="0.01" required><br>
+        
+        <label for="material_quantity_{{ i }}">Quantity</label>
+        <input type="number" name="material_quantity_{{ i }}" required><br><br>
+        {% endfor %}
+        
+        <h3>Labor and Overhead</h3>
+        <label for="labor_hours">Labor Hours</label>
+        <input type="number" name="labor_hours" step="0.01" required><br>
+        
+        <label for="hourly_rate">Hourly Rate (USD)</label>
+        <input type="number" name="hourly_rate" step="0.01" required><br>
+        
+        <label for="overhead">Overhead Costs (USD)</label>
+        <input type="number" name="overhead" step="0.01" required><br>
+        
+        <label for="profit_margin">Profit Margin (%)</label>
+        <input type="number" name="profit_margin" step="0.01" required><br><br>
+        
+        <button type="submit">Calculate</button>
+    </form>
+</body>
+</html>
+
+# 3. Result Display Template (templates/result.html)
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing Results</title>
+</head>
+<body>
+    <h1>Pricing Breakdown</h1>
+    <ul>
+        <li>Material Cost: ${{ price_breakdown['Material Cost'] }}</li>
+        <li>Labor Cost: ${{ price_breakdown['Labor Cost'] }}</li>
+        <li>Overhead: ${{ price_breakdown['Overhead'] }}</li>
+        <li>Total Cost (Before Profit): ${{ price_breakdown['Total Cost (Before Profit'] }}</li>
+        <li>Final Selling Price: ${{ price_breakdown['Selling Price'] }}</li>
+    </ul>
+    <a href="/">Go Back</a>
+</body>
+</html>
+
+# How to Run the Application
+# 1. Install Flask:
+
+pip install flask
+
+# 2. Save the files in the solar_pricing folder as shown in the structure.
+
+# 3. Run the Flask application:
+
+python app.py
+
+# 4. Open a browser and navigate to http://127.0.0.1:5000/.
+
+# Next Steps
+# 1. Dynamic Features:
+
+# Add more input fields for materials if needed.
+
+# Include regional cost adjustments (e.g., shipping/taxes).
+
+# 2. Styling:
+
+# Use CSS or frameworks like Bootstrap for a better design.
+
+# 3. Advanced Integration:
+
+# Store data in a database (SQLite or MongoDB).
+
+# Add user authentication for saving pricing history.
+
+# Let’s enhance the web-based calculator and prepare it for deployment and additional features like regional adjustments, database integration, and user authentication.
+
+# Enhancements and Deployment Plan
+# 1. Add Dynamic Features
+# We’ll add the ability to:
+
+# Adjust costs based on the region (e.g., shipping or tax rates).
+
+# Add unlimited materials dynamically without predefined input fields.
+
+# Updated Input Form:
+# Here’s how we can make the material input dynamic using JavaScript.
+
+# Updated index.html:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Battery Pricing Calculator</title>
+    <script>
+        function addMaterialRow() {
+            const container = document.getElementById('materials-container');
+            const row = document.createElement('div');
+            row.innerHTML = `
+                <label>Material Name:</label>
+                <input type="text" name="material_name[]" required>
+                <label>Cost per Unit (USD):</label>
+                <input type="number" name="material_cost[]" step="0.01" required>
+                <label>Quantity:</label>
+                <input type="number" name="material_quantity[]" required><br><br>
+            `;
+            container.appendChild(row);
+        }
+    </script>
+</head>
+<body>
+    <h1>Solar Battery Pricing Calculator</h1>
+    <form action="/calculate" method="post">
+        <h3>Materials</h3>
+        <div id="materials-container">
+            <!-- Dynamic Material Rows Will Appear Here -->
+        </div>
+        <button type="button" onclick="addMaterialRow()">Add Material</button><br><br>
+
+        <h3>Labor and Overhead</h3>
+        <label for="labor_hours">Labor Hours</label>
+        <input type="number" name="labor_hours" step="0.01" required><br>
+        
+        <label for="hourly_rate">Hourly Rate (USD)</label>
+        <input type="number" name="hourly_rate" step="0.01" required><br>
+        
+        <label for="overhead">Overhead Costs (USD)</label>
+        <input type="number" name="overhead" step="0.01" required><br>
+        
+        <label for="profit_margin">Profit Margin (%)</label>
+        <input type="number" name="profit_margin" step="0.01" required><br><br>
+        
+        <label for="region">Region (Optional)</label>
+        <select name="region">
+            <option value="default">Default</option>
+            <option value="region1">Region 1 (10% Tax)</option>
+            <option value="region2">Region 2 (15% Tax)</option>
+        </select><br><br>
+        
+        <button type="submit">Calculate</button>
+    </form>
+</body>
+</html>
+
+# Backend Update for Dynamic Materials and Region Adjustments:
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    # Get dynamic materials
+    materials = []
+    names = request.form.getlist("material_name[]")
+    costs = request.form.getlist("material_cost[]")
+    quantities = request.form.getlist("material_quantity[]")
+    
+    for name, cost, quantity in zip(names, costs, quantities):
+        materials.append({"name": name, "cost": float(cost), "quantity": int(quantity)})
+
+    # Get other inputs
+    labor_hours = float(request.form.get("labor_hours", 0))
+    hourly_rate = float(request.form.get("hourly_rate", 0))
+    overhead = float(request.form.get("overhead", 0))
+    profit_margin = float(request.form.get("profit_margin", 0))
+    region = request.form.get("region")
+
+    # Apply regional adjustments
+    tax_rate = 0
+    if region == "region1":
+        tax_rate = 0.10
+    elif region == "region2":
+        tax_rate = 0.15
+
+    # Calculate base price
+    price_breakdown = calculate_battery_price(materials, labor_hours, hourly_rate, overhead, profit_margin)
+
+    # Adjust for region
+    price_breakdown["Selling Price"] += price_breakdown["Selling Price"] * tax_rate
+
+    return render_template('result.html', price_breakdown=price_breakdown, region=region)
+
+# 2. Add Database Integration
+# We’ll store material costs and pricing history using SQLite. This lets you access past calculations or update frequently used material costs.
+
+# Setup Database (models.py):
+
+import sqlite3
+
+def init_db():
+    conn = sqlite3.connect('pricing.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS pricing_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            materials TEXT,
+            labor_cost REAL,
+            overhead REAL,
+            profit_margin REAL,
+            region TEXT,
+            total_price REAL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def save_pricing(materials, labor_cost, overhead, profit_margin, region, total_price):
+    conn = sqlite3.connect('pricing.db')
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO pricing_history (materials, labor_cost, overhead, profit_margin, region, total_price)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (str(materials), labor_cost, overhead, profit_margin, region, total_price))
+    conn.commit()
+    conn.close()
+
+# Update app.py for Database Logging:
+
+from models import init_db, save_pricing
+
+# Initialize database
+init_db()
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    # Existing code...
+
+    # Save to database
+    save_pricing(materials, labor_hours * hourly_rate, overhead, profit_margin, region, price_breakdown["Selling Price"])
+    
+    return render_template('result.html', price_breakdown=price_breakdown, region=region)
+
+# 3. Deploy the App
+# You can deploy the app using Heroku or Render.
+
+# Steps for Heroku Deployment:
+
+# 1. Install Gunicorn:
+
+pip install gunicorn
+
+# 2. Create a Procfile:
+
+web: gunicorn app:app
+
+# 3. Initialize a Git repository and push to Heroku:
+
+git init
+git add .
+git commit -m "Initial commit"
+heroku create
+git push heroku master
+
+# Next Steps
+# Add user authentication using Flask-Login to allow users to save their calculations securely.
+
+# Improve the UI with Bootstrap or Materialize for a professional look.
+
+# Extend regional adjustments to include currency conversion or advanced tax rules.
+
+# Let’s implement user authentication and style the app using Bootstrap, followed by detailed deployment instructions for deploying the app to Heroku.
+
+# 1. Adding User Authentication with Flask-Login
+# Install Required Libraries
+
+pip install flask-login flask-bcrypt
+
+# Update Project Structure
+
+# solar_pricing/
+# ├── app.py               # Main Flask application
+# ├── auth.py              # Authentication-related logic
+# ├── models.py            # Database models and functions
+# ├── templates/
+# │   ├── index.html       # Input form
+# │   ├── result.html      # Output page
+# │   ├── login.html       # Login page
+# │   ├── register.html    # Registration page
+# ├── static/
+# │   ├── styles.css       # Optional CSS for custom styling
+
+# Database Update
+# Add a table for users in the database to store login credentials securely.
+
+# Update models.py:
+
+from flask_bcrypt import Bcrypt
+import sqlite3
+
+bcrypt = Bcrypt()
+
+def init_db():
+    conn = sqlite3.connect('pricing.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS pricing_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            materials TEXT,
+            labor_cost REAL,
+            overhead REAL,
+            profit_margin REAL,
+            region TEXT,
+            total_price REAL,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def register_user(username, password):
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    try:
+        conn = sqlite3.connect('pricing.db')
+        c = conn.cursor()
+        c.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed_password))
+        conn.commit()
+        conn.close()
+        return True
+    except sqlite3.IntegrityError:
+        return False  # Username already exists
+
+def get_user(username):
+    conn = sqlite3.connect('pricing.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM users WHERE username = ?', (username,))
+    user = c.fetchone()
+    conn.close()
+    return user
+
+# Authentication Logic (auth.py)
+# User Login and Registration Using Flask-Login:
+
+from flask import Blueprint, render_template, redirect, request, flash, session
+from flask_login import LoginManager, login_user, logout_user, UserMixin, login_required
+from models import register_user, get_user, bcrypt
+
+auth = Blueprint('auth', __name__)
+login_manager = LoginManager()
+
+class User(UserMixin):
+    def __init__(self, id, username):
+        self.id = id
+        self.username = username
+
+@login_manager.user_loader
+def load_user(user_id):
+    user_data = get_user_by_id(user_id)
+    if user_data:
+        return User(user_data[0], user_data[1])
+    return None
+
+@auth.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if register_user(username, password):
+            flash('Registration successful! Please log in.', 'success')
+            return redirect('/login')
+        else:
+            flash('Username already exists. Try a different one.', 'danger')
+    return render_template('register.html')
+
+@auth.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user_data = get_user(username)
+        if user_data and bcrypt.check_password_hash(user_data[2], password):
+            user = User(user_data[0], username)
+            login_user(user)
+            session['user_id'] = user.id
+            return redirect('/')
+        flash('Invalid credentials. Please try again.', 'danger')
+    return render_template('login.html')
+
+@auth.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    session.clear()
+    flash('You have been logged out.', 'info')
+    return redirect('/login')
+
+# Update app.py
+# Integrate the authentication blueprint and protect routes:
+
+from flask import Flask
+from flask_login import LoginManager, login_required
+from models import init_db
+from auth import auth, login_manager
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+app.register_blueprint(auth)
+
+login_manager.init_app(app)
+
+init_db()
+
+@app.route('/')
+@login_required
+def index():
+    return render_template('index.html')
+
+# Templates for Login and Registration
+# login.html:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <form method="POST">
+        <label>Username</label>
+        <input type="text" name="username" required>
+        <label>Password</label>
+        <input type="password" name="password" required>
+        <button type="submit">Login</button>
+    </form>
+    <a href="/register">Don't have an account? Register</a>
+</body>
+</html>
+
+# register.html:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Register</title>
+</head>
+<body>
+    <h1>Register</h1>
+    <form method="POST">
+        <label>Username</label>
+        <input type="text" name="username" required>
+        <label>Password</label>
+        <input type="password" name="password" required>
+        <button type="submit">Register</button>
+    </form>
+</body>
+</html>
+
+# 2. Styling with Bootstrap
+# To style the app, include Bootstrap in your templates:
+
+# Add this <link> in the <head> section of your HTML files:
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+# 3. Deploy the App on Heroku
+# Steps:
+# 1. Install Heroku CLI:
+# Download and install from Heroku CLI.
+
+# 2. Add Dependencies:
+# Update requirements.txt with all dependencies:
+
+pip freeze > requirements.txt
+
+# 3. Create a Procfile:
+# Add this line:
+
+web: gunicorn app:app
+
+# 4. Login to Heroku:
+
+heroku login
+
+# 5. Initialize Git Repository:
+
+git init
+git add .
+git commit -m "Initial commit"
+
+# 6. Create Heroku App:
+
+heroku create
+
+# 7. Deploy the App:
+
+git push heroku master
+
+# 8. Access the App:
+# Open your Heroku app URL:
+
+heroku open
+
+# Great! Let’s dive deeper into advanced deployment options, custom styling, and enhanced database features. Here's what we can address:
+
+# 1. Advanced Deployment Options
+# If Heroku doesn’t fully meet your needs, consider the following alternatives:
+
+# Option A: Deploy with Docker
+# Using Docker ensures consistency across environments.
+
+# 1. Create a Dockerfile:
+
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the current directory contents into the container
+COPY . /app
+
+# Install the required Python packages
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expose the Flask port
+EXPOSE 5000
+
+# Define the command to run the app
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000"]
+
+# 2. Build and Run the Docker Image Locally:
+
+docker build -t solar-calculator .
+docker run -p 5000:5000 solar-calculator
+
+# 3. Deploy to Docker Hub or Platforms like AWS ECS:
+# Push the image to a registry and deploy to your preferred service.
+
+# Option B: Deploy on AWS Elastic Beanstalk
+# Elastic Beanstalk allows for easy scaling.
+
+# 1. Install the Elastic Beanstalk CLI:
+
+pip install awsebcli
+
+# 2. Initialize Your Application:
+
+eb init -p python-3.9 solar-calculator
+
+# 3. Deploy:
+
+eb create solar-calculator-env
+eb open
+
+# Option C: Render or Vercel
+# Render: Simple and free-tier hosting for web services.
+
+# Vercel: Best for serverless deployments.
+
+# 2. Custom Styling
+# To improve the design using Bootstrap:
+
+# 1. Add a Navbar to Your App:
+# In index.html:
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="/">Solar Calculator</a>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/login">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/register">Register</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+# 2. Style the Form:
+# Wrap your form elements in Bootstrap classes:
+
+<form class="p-4 shadow-sm">
+    <div class="form-group">
+        <label for="material_name">Material Name:</label>
+        <input type="text" id="material_name" name="material_name[]" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="material_cost">Cost per Unit:</label>
+        <input type="number" id="material_cost" name="material_cost[]" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Calculate</button>
+</form>
+
+# 3. Add Cards for Result Display:
+# In result.html:
+
+<div class="card">
+    <div class="card-header">
+        Pricing Breakdown
+    </div>
+    <div class="card-body">
+        <p><strong>Material Costs:</strong> ${{ price_breakdown['Materials'] }}</p>
+        <p><strong>Labor Costs:</strong> ${{ price_breakdown['Labor'] }}</p>
+        <p><strong>Profit Margin:</strong> ${{ price_breakdown['Profit Margin'] }}</p>
+        <p><strong>Total Price:</strong> ${{ price_breakdown['Selling Price'] }}</p>
+    </div>
+</div>
+
+# 4. Add a Footer:
+
+<footer class="text-center p-3 bg-light mt-4">
+    <p>&copy; 2024 Solar Calculator. All Rights Reserved.</p>
+</footer>
+
+# 3. Enhanced Database Features
+# Option A: Add User-Based Pricing History
+# Display pricing history for each logged-in user.
+
+# 1. Update models.py:
+
+def get_pricing_history(user_id):
+    conn = sqlite3.connect('pricing.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM pricing_history WHERE user_id = ?', (user_id,))
+    history = c.fetchall()
+    conn.close()
+    return history
+
+# 2. Create a Pricing History Route:
+# In app.py:
+
+@app.route('/history')
+@login_required
+def history():
+    user_id = session['user_id']
+    history = get_pricing_history(user_id)
+    return render_template('history.html', history=history)
+
+# 3. Display the History:
+# In history.html:
+
+<h1>Pricing History</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Materials</th>
+            <th>Total Price</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in history %}
+        <tr>
+            <td>{{ record[0] }}</td>
+            <td>{{ record[2] }}</td>
+            <td>${{ record[6] }}</td>
+            <td>{{ record[7] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+# Option B: Add Analytics Dashboard
+# Track total revenue, popular materials, and pricing trends.
+
+# 1. Add an admin dashboard route.
+
+# 2. Aggregate data using SQLite queries (e.g., total revenue, most frequently used materials).
+
+# Next Steps
+# Would you like:
+
+# 1. A specific deployment guide for Docker, AWS, or another platform?
+
+# 2. Custom CSS examples for enhanced branding?
+
+# 3. Details on analytics and admin dashboard setup?
+
+# Let’s proceed with the next steps. Could you clarify what you’d like to focus on next? Here are the options:
+
+# 1. A step-by-step deployment guide for platforms like Docker, AWS, or Render.
+
+# 2. Advanced custom styling and branding for your app.
+
+# 3. Setting up an analytics dashboard with key insights, such as total revenue and pricing trends.
+
+# 4. Any other specific feature or enhancement you have in mind.
+
+# Let me know, and I’ll guide you accordingly! 😊
+
+# Great! Let me know which area you'd like to dive into first, or feel free to share more details about the feature or enhancement you're envisioning. Here's a quick summary of what I can help you with:
+
+# 1. Deploying Your App:
+
+# Choose a platform: Docker, AWS, Render, or Heroku.
+
+# Full deployment instructions tailored to your choice.
+
+# 2. Styling and Branding:
+
+# Advanced UI improvements with Bootstrap or custom CSS.
+
+# Adding logos, themes, or responsive design.
+
+# 3. Analytics Dashboard:
+
+# Visualize pricing trends, revenue, or material usage.
+
+# Use charts (e.g., Chart.js, Plotly) for interactive insights.
+
+# 4. New Features:
+
+# Suggest any additional functionality you'd like to add.
+
+# Let me know what you'd like to focus on! 🚀
